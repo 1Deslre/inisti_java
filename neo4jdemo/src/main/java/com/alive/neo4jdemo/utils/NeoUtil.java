@@ -32,7 +32,7 @@ public class NeoUtil {
      * 根据传入进来的类型查找出所有节点
      *
      * @param type  返回的实体类型
-     * @param title 查找的类型
+     * @param title 查找的标签
      * @return 返回节点的一个集合
      */
     public static <R> Results<List<R>> GetNodeList(Class<R> type, String title) {
@@ -61,7 +61,7 @@ public class NeoUtil {
      * 根据传入进来的类型和对应的参数条件查找出所有节点
      *
      * @param type    返回的实体类型
-     * @param title   要查找的对应的类型
+     * @param title   要查找的对应的标签
      * @param premise 参数条件
      * @return 返回符合参数条件的节点集合
      */
@@ -93,7 +93,7 @@ public class NeoUtil {
      * 根据关系和条件获取双方节点
      *
      * @param premise 条件参数
-     * @param title   关系类型
+     * @param title   关系标签
      */
     public static <R> Results<List<RelationshipNode<Node, Node>>> GetRelationship(R premise, String title) {
         if (isEmpty(premise) || isEmpty(title)) {
@@ -134,9 +134,9 @@ public class NeoUtil {
     /**
      * 根据条件获取有关系的节点
      *
-     * @param type          查找结点的类型
-     * @param premise       关系的条件参数
-     * @param title         关系类型
+     * @param type    查找结点的类型
+     * @param premise 关系的条件参数
+     * @param title   关系标签
      */
     public static <R> Results<List<RelationshipNode<R, Node>>> GetNotEndList(Class<R> type, R premise, String title) {
         if (isEmpty(type) || isEmpty(premise) || isEmpty(title)) {
@@ -174,9 +174,10 @@ public class NeoUtil {
 
     /**
      * 根据条件获取箭头指向左边的箭头
-     * @param type          节点对应的实体类
-     * @param premise       节点的条件参数
-     * @param title         节点的类型
+     *
+     * @param type    节点对应的实体类
+     * @param premise 节点的条件参数
+     * @param title   节点的标签
      */
     public static <R> Results<List<RelationshipNode<R, Node>>> GetLeftList(Class<R> type, R premise, String title) {
         if (isEmpty(type) || isEmpty(premise) || isEmpty(title)) {
@@ -214,9 +215,10 @@ public class NeoUtil {
 
     /**
      * 根据条件获取箭头指向右边的箭头
-     * @param type          节点对应的实体类
-     * @param premise       节点的条件参数
-     * @param title          节点的类型
+     *
+     * @param type    节点对应的实体类
+     * @param premise 节点的条件参数
+     * @param title   节点的标签
      */
     public static <R> Results<List<RelationshipNode<Node, R>>> GetRightList(Class<R> type, R premise, String title) {
         if (isEmpty(type) || isEmpty(premise) || isEmpty(title)) {
@@ -226,7 +228,7 @@ public class NeoUtil {
         RelationshipNode<Node, R> node;
         try {
             String s = buildClause(premise);
-            String url = "match (a:`" + title + "`{" + s + "}) <- [r] - (b) return a,r,b;";
+            String url = "match  (a:`" + title + "`{" + s + "}) <- [r] - (b) return a,r,b;";
             Result result = session.run(url);
             Record record;
             Node nodeA;
@@ -250,28 +252,99 @@ public class NeoUtil {
         return Results.ok(list);
     }
 
+    /**
+     * 创建一个节点
+     *
+     * @param premise 节点的参数
+     * @param title   节点对应的标签
+     */
+    public static <R> Results<R> SaveNode(R premise, String title) {
+        if (isEmpty(premise) || isEmpty(title)) {
+            return Results.fail();
+        }
 
-    private static <R> Results<R> GetOneNode(Class<R> type, R premise, String title) {
+        String s = buildClause(premise);
         try {
-            String s = " where " + buildWhereClause(premise);
-            String url = "match (n:`" + title + "`) " + s + " return n";
-            Result result = session.run(url);
-            while (result.hasNext()) {
-                Record record = result.next();
-                Node node = record.get("n").asNode();
-                Map<String, Object> stringObjectMap = node.asMap();
-
-
-                stringObjectMap.forEach((K, V) -> {
-                    System.out.println("K = " + K);
-                    System.out.println("V = " + V);
-                });
-            }
+            String cql = "MERGE  (: `" + title + "`{" + s + "})";
+            System.out.println("cql = " + cql);
+            session.run(cql);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return Results.ok();
     }
+
+
+    /**
+     * 创建多个节点
+     *
+     * @param premiseList 多个节点的集合
+     * @param title       节点对应的标签
+     */
+    public static <R> Results<R> SaveListNode(List<R> premiseList, String title) {
+        if (isEmpty(premiseList) || isEmpty(title)) {
+            return Results.fail();
+        }
+        String s;
+        String cql;
+        for (R premise : premiseList) {
+            s = buildClause(premise);
+            System.out.println("s = " + s);
+            try {
+                cql = "MERGE  (: `" + title + "`{" + s + "})";
+                System.out.println("cql = " + cql);
+                session.run(cql);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return Results.ok();
+    }
+
+    public static <R, S, T> Results<R> SaveLeftRelationNode(R StartNode, String StartTitle, S Relation, String RelationTitle, R EndNode, String EndTitle) {
+        if (isEmpty(StartNode) || isEmpty(StartTitle) || isEmpty(Relation) || isEmpty(EndNode) || isEmpty(EndTitle)) {
+            return Results.fail();
+        }
+
+        String startNode = buildClause(StartNode);
+        String relation = buildClause(Relation);
+        String endNode = buildClause(EndNode);
+
+        try {
+            String cq = "MERGE   (:`" + StartTitle + "`{" + startNode + "}) <- [:`" + RelationTitle + "`{" + relation + "}] - (:`" + EndTitle + "`{" + endNode + "})";
+            String cql = "MERGE  (a:`" + StartTitle + "`{" + startNode + "}) MERGE  (b:`" + EndTitle + "`{" + endNode + "}) MERGE  (a) <- [:`" + RelationTitle + "`{" + relation + "}] - (b)";
+            System.err.println("cql = " + cql);
+            session.run(cql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Results.ok();
+    }
+
+    public static <R, S, T> Results<R> SaveRightRelationNode(R StartNode, String StartTitle, S Relation, String RelationTitle, R EndNode, String EndTitle) {
+        if (isEmpty(StartNode) || isEmpty(StartTitle) || isEmpty(Relation) || isEmpty(EndNode) || isEmpty(EndTitle)) {
+            return Results.fail();
+        }
+
+        String startNode = buildClause(StartNode);
+        String relation = buildClause(Relation);
+        String endNode = buildClause(EndNode);
+
+        try {
+            String cq = "MERGE   (:`" + StartTitle + "`{" + startNode + "}) <- [:`" + RelationTitle + "`{" + relation + "}] - (:`" + EndTitle + "`{" + endNode + "})";
+            String cql = "MERGE  (a:`" + StartTitle + "`{" + startNode + "}) MERGE  (b:`" + EndTitle + "`{" + endNode + "}) MERGE  (a) - [:`" + RelationTitle + "`{" + relation + "}] -> (b)";
+            System.err.println("cql = " + cql);
+            session.run(cql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Results.ok();
+    }
+
+
 
     /**
      * 删除所有数据
@@ -353,19 +426,21 @@ public class NeoUtil {
 
     public static void main(String[] args) {
 
+        DeleteAll();
 
-        PersonNode personNode = new PersonNode();
-        personNode.setName("张飞");
-        List<RelationshipNode<Node, PersonNode>> relationshipNodeList = GetRightList(PersonNode.class, personNode, "人物").getData();
-        for (RelationshipNode<Node, PersonNode> relationshipNode : relationshipNodeList) {
-            Node startNode = relationshipNode.getStartNode();
-            PersonNode endNode = relationshipNode.getEndNode();
-            Relationship relationship = relationshipNode.getRelationship();
-
-            System.out.println("startNode = " + startNode.asMap());
-            System.out.println("relationship = " + relationship.asMap());
-            System.out.println("endNode = " + endNode);
-        }
+//
+//        PersonNode personNode = new PersonNode();
+//        personNode.setName("张飞");
+//        List<RelationshipNode<Node, PersonNode>> relationshipNodeList = GetRightList(PersonNode.class, personNode, "人物").getData();
+//        for (RelationshipNode<Node, PersonNode> relationshipNode : relationshipNodeList) {
+//            Node startNode = relationshipNode.getStartNode();
+//            PersonNode endNode = relationshipNode.getEndNode();
+//            Relationship relationship = relationshipNode.getRelationship();
+//
+//            System.out.println("startNode = " + startNode.asMap());
+//            System.out.println("relationship = " + relationship.asMap());
+//            System.out.println("endNode = " + endNode);
+//        }
 
 //        List<PersonNode> nodeList = GetNodeList(PersonNode.class, "人物").getData();
 //        nodeList.forEach(System.out::println);
