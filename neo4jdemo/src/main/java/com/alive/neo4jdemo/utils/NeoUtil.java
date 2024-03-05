@@ -344,7 +344,29 @@ public class NeoUtil {
         return Results.ok();
     }
 
-
+    /**
+     * 获取标签的节点数量
+     *
+     * @param title 标签
+     */
+    public static Results<Long> GetTitleCount(String title) {
+        if (isEmpty(title)) {
+            return Results.fail();
+        }
+        long count = 0L;
+        try {
+            String cql = "match (n:`" + title + "`) return count(n) as count";
+            System.err.println("cql = " + cql);
+            Result result = session.run(cql);
+            if (result.hasNext()) {
+                Record record = result.next();
+                count = record.get("count").asLong();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Results.ok(count);
+    }
 
     /**
      * 删除所有数据

@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": 1,
+    "name": "John",
+    "address": {
+      "city": "New York",
+      "zipcode": "10001"
+    }
+  },
+  "product": {
+    "id": 101,
+    "name": "Laptop",
+    "price": 999
+  }
+}
