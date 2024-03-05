@@ -368,6 +368,48 @@ public class NeoUtil {
         return Results.ok(count);
     }
 
+    public static Results<RelationshipNode<PersonNode, Node>> GetPersonNodeAll() {
+        try {
+            String cql = "match(a:`人物`) - [r] -> (b) return a,r,b";
+            Result result = session.run(cql);
+            Record record;
+            while (result.hasNext()) {
+                record = result.next();
+                record.get("a").asNode();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Results.ok();
+    }
+
+
+    /**
+     * 获取当前标签下面的所有节点的 name
+     *
+     * @param title 标签
+     */
+    public static Results<List<String>> GetNodeNameList(String title) {
+        if (isEmpty(title)) {
+            return Results.fail();
+        }
+        List<String> list = new ArrayList<>();
+        try {
+            String cypherQuery = "MATCH (n:`" + title + "`) RETURN n.name";
+            Result result = session.run(cypherQuery);
+            String name;
+            while (result.hasNext()) {
+                Record record = result.next();
+                name = record.get("n.name").asString();
+                list.add(name);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Results.ok(list);
+    }
+
     /**
      * 删除所有数据
      */

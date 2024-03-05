@@ -13,13 +13,12 @@ public class MyController {
 
     @PostMapping("/processJson")
     public void processJson(@RequestBody MyRequest request) {
+
+
+
         User user = request.getUser();
         Product product = request.getProduct();
         Address address = user.getAddress();
-
-        System.out.println("user = " + user);
-        System.out.println("address = " + address);
-        System.out.println("product = " + product);
 
     }
 }
