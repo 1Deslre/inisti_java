@@ -6,6 +6,7 @@ import com.alive.neo4jdemo.dto.PersonNode;
 import com.alive.neo4jdemo.dto.RelationshipNode;
 import com.alive.neo4jdemo.result.Results;
 import org.neo4j.driver.*;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.Relationship;
 
@@ -410,6 +411,26 @@ public class NeoUtil {
         return Results.ok(list);
     }
 
+    public static Results<List<String>> GetAloneNameList(String title, String name) {
+        if (isEmpty(title)) {
+            return Results.fail();
+        }
+        List<String> list = new ArrayList<>();
+        try {
+            String cypherQuery = "MATCH (n:`" + title + "`{name:'" + name + "'}) - [r] - (a)  RETURN a.name";
+            Result result = session.run(cypherQuery);
+            String s;
+            while (result.hasNext()) {
+                Record record = result.next();
+                s = record.get("a.name").asString();
+                list.add(s);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Results.ok(list);
+    }
+
     /**
      * 删除所有数据
      */
@@ -490,7 +511,10 @@ public class NeoUtil {
 
     public static void main(String[] args) {
 
-        DeleteAll();
+//        DeleteAll();
+
+        List<String> list = GetAloneNameList("人物", "刘备").getData();
+        System.out.println("list.size() = " + list.size());
 
 //
 //        PersonNode personNode = new PersonNode();

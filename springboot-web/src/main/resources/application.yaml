@@ -1,2 +1,6 @@
 server:
   port: 80
+com:
+  example:
+    name: "张三"
+    version: "123"
