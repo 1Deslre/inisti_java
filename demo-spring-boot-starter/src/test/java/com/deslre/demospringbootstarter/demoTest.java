@@ -1,4 +1,5 @@
-package com.example.springbootweb;
+package com.deslre.demospringbootstarter;
+
 import com.deslre.demospringbootstarter.entity.User;
 import com.deslre.demospringbootstarter.service.IUserService;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,7 @@ import javax.annotation.Resource;
 import java.util.List;
 
 @SpringBootTest
-class SpringbootWebApplicationTests {
+public class demoTest {
 
     @Resource
     private IUserService userService;
@@ -16,6 +17,6 @@ class SpringbootWebApplicationTests {
     @Test
     void name() {
         List<User> list = userService.list();
-        list.forEach(System.out::println);
+        System.out.println("list = " + list);
     }
 }
