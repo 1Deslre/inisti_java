@@ -16,5 +16,13 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TblBookServiceImpl extends ServiceImpl<TblBookMapper, TblBook> implements ITblBookService {
-
+    public void S(){
+        System.out.println("log = " + log);
+        System.out.println("log = " + log);
+        System.out.println("log = " + log);
+        System.out.println("log = " + log);
+        System.out.println("log = " + log);
+        System.out.println("log = " + log);
+        System.out.println("log = " + log);
+    }
 }
