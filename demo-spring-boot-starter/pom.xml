@@ -51,42 +51,5 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <!-- 项目好多年不更新，目前最新版本为1.2.1 -->
-                <groupId>net.roseboy</groupId>
-                <artifactId>classfinal-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <configuration>
-                    <!--加密打包之后pom.xml会被删除，不用担心在jar包里找到此密码，若不需要时配置 # 即可-->
-                    <password>200381</password>
-                    <!-- 被加密的包，如有多个用,隔开 -->
-                    <packages>com.deslre.demospringbootstarter.service</packages>
-                    <!-- 被加密的配置文件，如有多个用,隔开 -->
-                    <cfgfiles>application.yaml</cfgfiles>
-                    <!-- 排除的类名，可为空，如有多个用,隔开 -->
-                    <excludes>org.spring</excludes>
-                    <!-- jar/war包lib下要加密jar文件名(可为空,多个用,分割) -->
-                    <libjars></libjars>
-                    <!-- 指定机器启动,机器码 想用的话就自己了解一下，步骤大概是下个jar包，在服务器运行之后得到一个机器码，然后指定机器码之后，只能在该机器上运行-->
-                    <!-- <code>xxxx</code> -->
-                </configuration>
-                <!-- 固定配置，不用修改 -->
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>classFinal</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
